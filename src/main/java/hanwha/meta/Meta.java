@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class Meta {
 	private static final String  DATA_DIR = "."; 
 	private static final File   DATA_FILE = new File(DATA_DIR, 
-			                                    Meta.class.getName() + ".data");
+	                                                 Meta.class.getName());
 	private static boolean     refreshing = false;
 	private static AtomicInteger useCount = new AtomicInteger();
 
@@ -88,14 +88,14 @@ public class Meta {
 	 * @throws Exception 테이블 읽기 오류, 데이터 배열 원소 크기 오류.
 	 */
 	public static void download(File file) throws Exception {
-		IntSet     intSet0 = new  IntSet(3000);
-		Set<Data> dataSet0 = new   Set<>(300);
-		PairSet   pairSet0 = new PairSet(10000);
-		IntList  dataList0 = new IntList(10000, 2000);
-		IntList data1List0 = new IntList(10000, 3000);
-		IntList data2List0 = new IntList(40000, 2000);
-		IntList   cvrList0 = new IntList(30000, 1000);
-		ImCvr       imCvr0 = new   ImCvr(3000);
+		IntSet     intSet = new  IntSet(3000);
+		Set<Data> dataSet = new   Set<>(300);
+		PairSet   pairSet = new PairSet(10000);
+		IntList  dataList = new IntList(10000, 2000);
+		IntList data1List = new IntList(10000, 3000);
+		IntList data2List = new IntList(40000, 2000);
+		IntList   cvrList = new IntList(30000, 1000);
+		ImCvr       imCvr = new   ImCvr(3000);
 
 		time(null);
 		List<Row> rows = Dao.getRowList();    // 키 구성 정보를 모두 읽는다
@@ -107,21 +107,21 @@ public class Meta {
 		for (int i = 0; i < rowCount; i++) {
 			Row thisRow = rows.get(i);
 			Row nextRow = rows.get(i + 1);
-			dataList0.append(dataSet0.find(thisRow.data)); // 데이터
+			dataList.append(dataSet.find(thisRow.data));  // 데이터
 
 			if (!thisRow.sameCdNddt(nextRow)) {
-				int cdNddt = intSet0.find(thisRow.cdNddt); // 구분-종료일
-				int   data = dataList0.find(pairSet0);     // 데이터 리스트
-				data1List0.append(pairSet0.find(cdNddt, data));
+				int cdNddt = intSet.find(thisRow.cdNddt); // 구분-종료일
+				int   data = dataList.find(pairSet);      // 데이터 리스트
+				data1List.append(pairSet.find(cdNddt, data));
 
 				if (!thisRow.sameCvrcd(nextRow)) {
-					cvrList0.append(intSet0.find(thisRow.cvrCd)); // 담보 코드
-					data2List0.append(data1List0.find(pairSet0)); // 담보 데이터
+					cvrList.append(intSet.find(thisRow.cvrCd)); // 담보 코드
+					data2List.append(data1List.find(pairSet));  // 담보 데이터
 
 					if (!thisRow.sameImcd(nextRow)) {
-						imCvr0.append(thisRow.imCd,        // 종목 코드
-						              cvrList0.find(),     // 담보 코드 리스트 
-						              data2List0.find());  // 담보  데이터 리스트
+						imCvr.append(thisRow.imCd,        // 종목 코드
+						              cvrList.find(),     // 담보 코드 리스트 
+						              data2List.find());  // 담보  데이터 리스트
 					}
 				}
 			}
@@ -130,15 +130,15 @@ public class Meta {
         try (ObjectOutputStream out = new ObjectOutputStream(
         		                      new BufferedOutputStream(
         		                      new FileOutputStream(file)))) {
-        	out.writeObject(intSet0.copy());
-        	out.writeObject(dataSet0.copy());
-        	out.writeObject(pairSet0.copyToShorts());
-        	out.writeObject(dataList0.copyToShorts());
-        	out.writeObject(data1List0.copyToShorts());
-        	out.writeObject(data2List0.copyToShorts());
-        	out.writeObject(cvrList0.copyToShorts());
-        	out.writeObject(imCvr0.copyCvr());
-        	out.writeObject(imCvr0.copyIm());
+        	out.writeObject(intSet.copy());
+        	out.writeObject(dataSet.copy());
+        	out.writeObject(pairSet.copyToShorts());
+        	out.writeObject(dataList.copyToShorts());
+        	out.writeObject(data1List.copyToShorts());
+        	out.writeObject(data2List.copyToShorts());
+        	out.writeObject(cvrList.copyToShorts());
+        	out.writeObject(imCvr.copyCvr());
+        	out.writeObject(imCvr.copyIm());
         }
 		time("Write");
 
@@ -146,13 +146,13 @@ public class Meta {
 		           "im[%d] cvr[3][%d] cvrList[%d](%d)\n" + 
 		           "intSet[%d] pairSet[2][%d] dataSet[%d]\n" +
 		           "dataList[%d](%d) data1List[%d](%d) data2List[%d](%d)\n",
-		                        rowCount, (file.length() + 1023) / 1024,
-		                        file.getAbsolutePath(),
-		    imCvr0.size(), imCvr0.size(), cvrList0.size(), cvrList0.indexSize(),
-		                  intSet0.size(), pairSet0.size(), dataSet0.size(),
-		                dataList0.size(),  dataList0.indexSize(),
-		               data1List0.size(), data1List0.indexSize(),
-		               data2List0.size(), data2List0.indexSize());
+		                           rowCount, (file.length() + 1023) / 1024,
+		                                      file.getCanonicalPath(),
+		     imCvr.size(), imCvr.size(),   cvrList.size(), cvrList.indexSize(),
+		                  intSet.size(),   pairSet.size(), dataSet.size(),
+		                dataList.size(),  dataList.indexSize(),
+		               data1List.size(), data1List.indexSize(),
+		               data2List.size(), data2List.indexSize());
 	}
 
 	/**
@@ -305,8 +305,8 @@ public class Meta {
 	 * @param file  출력 파일 이름 -- null이거나 잘못된 이름이면 표준 출력으로 출력한다.
 	 * @throws Exception 데이터베이스 테이블 읽기 오류. 
 	 */
-	public static void testOrPrint(int from, int count, String file)
-		                    throws Exception {
+	public static void print(int from, int count, String file)
+	                  throws Exception {
 		boolean testing = count == 0;
 		int          to = Math.min(from + count, im.length);
 		PrintStream out = System.out;
@@ -367,5 +367,23 @@ public class Meta {
 		}
 	}
 
+	/**
+	 * 데이터를 콘솔에 출력한다.
+	 * @param from  출력 시작 종목 인덱스  -- 0, 1, 2, ...
+	 * @param count 출력 종목 수
+	 * @throws Exception 데이터베이스 테이블 읽기 오류.
+	 */
+	public static void print(int from, int count) throws Exception {
+		print(from, count, null);
+	}
+
+	/**
+	 * 데이터를 테이블에서 읽은 행과 맞추어 검사한다.
+	 * @throws Exception 데이터베이스 테이블 읽기 오류.
+	 */
+	public static void test() throws Exception {
+		print(0, 0, null);
+	}
+	
 	private Meta() {}
 }
